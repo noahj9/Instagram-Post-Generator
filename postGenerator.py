@@ -2,11 +2,11 @@ import tkinter as tk
 from tkinter import filedialog
 from PIL import Image, ImageTk
 
-# Global variables to store the position of the logo
+# Logo Position Holders
 logo_position = None
 drag_data = {"x": 0, "y": 0}
 
-# Function to open a file dialog and select an image
+# Open GUI
 def open_image():
     file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg;*.jpeg;*.png")])
     if file_path:
@@ -17,7 +17,7 @@ def open_image():
         image_label.image = image_cropped
         image_label.photo = photo  # Store reference to the PhotoImage
 
-# Function to crop the image to the specified size without changing the aspect ratio
+# Crop & Keep Aspect Ratio
 def crop_image(image, width, height):
     aspect_ratio = image.width / image.height
     target_ratio = width / height
@@ -36,14 +36,14 @@ def crop_image(image, width, height):
 
     return image.crop((left, top, right, bottom)).resize((width, height), resample=Image.LANCZOS)
 
-# Function to open a file dialog and select a logo image
+# Select Logo
 def open_logo():
     file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg;*.jpeg;*.png")])
     if file_path:
         logo_path.set(file_path)
         preview_logo()
 
-# Function to preview the selected logo
+# Preview Logo
 def preview_logo():
     logo_path_value = logo_path.get()
     if logo_path_value:
@@ -52,21 +52,21 @@ def preview_logo():
         logo_preview = ImageTk.PhotoImage(logo)
         logo_label.configure(image=logo_preview)
         logo_label.image = logo_preview
-        logo_label.logo = logo  # Store reference to the logo Image
+        logo_label.logo = logo  # Reference for display
 
-        # Enable dragging for the logo preview
+        # Drag to place
         logo_label.bind("<ButtonPress-1>", start_drag)
         logo_label.bind("<B1-Motion>", drag)
         logo_label.bind("<ButtonRelease-1>", end_drag)
 
-# Function to start dragging the logo
+# Drag Start function
 def start_drag(event):
     global logo_position, drag_data
     logo_position = (event.x, event.y)
     drag_data["x"] = event.x
     drag_data["y"] = event.y
 
-# Function to drag the logo
+# Drag event
 def drag(event):
     global logo_position, drag_data
     if logo_position:
@@ -76,20 +76,17 @@ def drag(event):
         drag_data["x"] = event.x
         drag_data["y"] = event.y
 
-# Function to end dragging the logo
+# End drag
 def end_drag(event):
     global logo_position
     logo_position = None
 
-# Function to generate the Instagram post
+# Generation of Post
 def generate_post():
-    # Perform image composition using the selected template and image
-    # Add your code here to create the final Instagram post
-
     # Get the selected image
     selected_image = image_label.image
 
-    # Get the path of the selected logo
+    # logo Filepath
     logo_path_value = logo_path.get()
 
     if logo_path_value:
@@ -97,24 +94,24 @@ def generate_post():
         logo = Image.open(logo_path_value)
         logo = logo.resize((int(logo.width / 3), int(logo.height / 3)))  # Scale down the logo to 1/6 of its size
 
-        # Calculate the position to overlay the logo
+        # Overlay position
         overlay_position = (logo_label.winfo_x(), logo_label.winfo_y())
 
-        # Create a copy of the selected image
+        # Copy the image
         post_image = selected_image.copy()
 
-        # Overlay the logo onto the image
+        # overlay the logo using a mask
         post_image.paste(logo, overlay_position, mask=logo)
 
-        # Save the final post image with higher quality
+        # Save and maintain quality
         save_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
         if save_path:
-            post_image.save(save_path, quality=95)  # Adjust the quality value as needed
+            post_image.save(save_path, quality=95)  # quality scaling up
             print("Post image saved successfully.")
     else:
         print("Please select a logo.")
 
-# Create the main window
+# Main Window
 window = tk.Tk()
 window.title("Instagram Post Generator")
 
@@ -122,11 +119,11 @@ window.title("Instagram Post Generator")
 image_label = tk.Label(window)
 image_label.pack()
 
-# Create the buttons
+# Buttons
 select_button = tk.Button(window, text="Select Image", command=open_image)
 select_button.pack(pady=10)
 
-logo_path = tk.StringVar()  # Variable to store the selected logo path
+logo_path = tk.StringVar()  # Logo path storage
 
 logo_select_button = tk.Button(window, text="Select Logo", command=open_logo)
 logo_select_button.pack(pady=10)
@@ -137,5 +134,5 @@ logo_label.pack()
 generate_button = tk.Button(window, text="Generate Post", command=generate_post)
 generate_button.pack(pady=10)
 
-# Start the main event loop
+# Start main event loop
 window.mainloop()
