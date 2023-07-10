@@ -50,7 +50,11 @@ def remove_background():
         logo_path.set(file_path)
     input = Image.open(file_path)
     output = remove(input)
-    output.save("C:/Users/Mercedes and Singh/Desktop/Tests/output.png")
+    save_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
+    if save_path:
+        output.save(save_path, quality=95)  # quality scaling up
+        print("Background removed and Image Saved.")
+
 
 # Preview Logo
 def preview_logo():
