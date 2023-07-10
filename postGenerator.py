@@ -17,21 +17,24 @@ def open_image():
         image_label.image = image_cropped
         image_label.photo = photo  # Store reference to the PhotoImage
 
-# Function to crop the image to the specified size
+# Function to crop the image to the specified size without changing the aspect ratio
 def crop_image(image, width, height):
-    aspect_ratio = width / height
-    image_ratio = image.width / image.height
+    aspect_ratio = image.width / image.height
+    target_ratio = width / height
 
-    if image_ratio > aspect_ratio:
-        new_width = int(image.height * aspect_ratio)
-        offset = (image.width - new_width) // 2
-        image = image.crop((offset, 0, offset + new_width, image.height))
+    if aspect_ratio > target_ratio:
+        new_height = image.height
+        new_width = int(new_height * target_ratio)
     else:
-        new_height = int(image.width / aspect_ratio)
-        offset = (image.height - new_height) // 2
-        image = image.crop((0, offset, image.width, offset + new_height))
+        new_width = image.width
+        new_height = int(new_width / target_ratio)
 
-    return image.resize((width, height), Image.ANTIALIAS)
+    left = (image.width - new_width) // 2
+    top = (image.height - new_height) // 2
+    right = left + new_width
+    bottom = top + new_height
+
+    return image.crop((left, top, right, bottom)).resize((width, height), resample=Image.LANCZOS)
 
 # Function to open a file dialog and select a logo image
 def open_logo():
@@ -45,7 +48,7 @@ def preview_logo():
     logo_path_value = logo_path.get()
     if logo_path_value:
         logo = Image.open(logo_path_value)
-        logo.thumbnail((100, 100))  # Resize logo to fit the preview area
+        logo = logo.resize((int(logo.width / 3), int(logo.height / 3)))  # Scale down the logo to 1/3 of its size
         logo_preview = ImageTk.PhotoImage(logo)
         logo_label.configure(image=logo_preview)
         logo_label.image = logo_preview
@@ -92,6 +95,7 @@ def generate_post():
     if logo_path_value:
         # Open the logo image
         logo = Image.open(logo_path_value)
+        logo = logo.resize((int(logo.width / 3), int(logo.height / 3)))  # Scale down the logo to 1/6 of its size
 
         # Calculate the position to overlay the logo
         overlay_position = (logo_label.winfo_x(), logo_label.winfo_y())
